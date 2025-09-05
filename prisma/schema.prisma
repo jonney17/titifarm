@@ -1,0 +1,221 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Auth models for NextAuth.js
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  role          Role      @default(CUSTOMER)
+
+  accounts      Account[]
+  sessions      Session[]
+  bookings      Booking[]
+  reviews       Review[]
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+enum Role {
+  ADMIN
+  CUSTOMER
+}
+
+// Domain models
+model Destination {
+  id        String  @id @default(cuid())
+  name      String
+  slug      String  @unique
+
+  tours     Tour[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Tour {
+  id            String         @id @default(cuid())
+  slug          String         @unique
+  title         String
+  description   String
+  basePrice     Int            // VND per guest
+  durationDays  Int?           // optional duration
+  type          TourType       @default(TOUR)
+  isActive      Boolean        @default(true)
+
+  destinationId String
+  destination   Destination    @relation(fields: [destinationId], references: [id])
+
+  images        TourImage[]
+  departures    DepartureSlot[]
+  bookings      Booking[]
+  reviews       Review[]
+
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model TourImage {
+  id        String @id @default(cuid())
+  tourId    String
+  url       String
+  alt       String?
+  sortOrder Int     @default(0)
+
+  tour      Tour   @relation(fields: [tourId], references: [id], onDelete: Cascade)
+}
+
+model DepartureSlot {
+  id           String   @id @default(cuid())
+  tourId       String
+  date         DateTime
+  capacity     Int
+  booked       Int      @default(0)
+  priceVnd     Int?
+  isActive     Boolean  @default(true)
+
+  tour         Tour     @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  bookings     Booking[]
+
+  @@unique([tourId, date])
+}
+
+model Booking {
+  id              String        @id @default(cuid())
+  code            String        @unique
+  userId          String?
+  tourId          String
+  departureSlotId String?
+  customerName    String
+  customerEmail   String
+  customerPhone   String?
+  numGuests       Int           @default(1)
+  totalAmountVnd  Int
+  currency        String        @default("VND")
+  status          BookingStatus @default(PENDING)
+  appliedCode     String?
+  discountVnd     Int?          @default(0)
+
+  user            User?         @relation(fields: [userId], references: [id])
+  tour            Tour          @relation(fields: [tourId], references: [id])
+  departure       DepartureSlot? @relation(fields: [departureSlotId], references: [id])
+  payments        Payment[]
+
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([customerEmail])
+}
+
+model Payment {
+  id            String        @id @default(cuid())
+  bookingId     String
+  provider      PaymentProvider
+  amountVnd     Int
+  currency      String        @default("VND")
+  status        PaymentStatus @default(PENDING)
+  transactionId String?       @unique
+  paidAt        DateTime?
+  raw           Json?
+
+  booking       Booking       @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+
+  createdAt     DateTime      @default(now())
+}
+
+model Review {
+  id        String    @id @default(cuid())
+  tourId    String
+  userId    String?
+  rating    Int
+  content   String?
+  status    ReviewStatus @default(PUBLISHED)
+
+  tour      Tour      @relation(fields: [tourId], references: [id], onDelete: Cascade)
+  user      User?     @relation(fields: [userId], references: [id])
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum TourType {
+  TOUR
+  WORKSHOP
+  KIDS
+}
+
+enum BookingStatus {
+  PENDING
+  PAID
+  CANCELED
+  EXPIRED
+}
+
+enum PaymentProvider {
+  VNPAY
+  MOMO
+  ZALOPAY
+  STRIPE
+  MANUAL
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+enum ReviewStatus {
+  PUBLISHED
+  PENDING
+  HIDDEN
+}

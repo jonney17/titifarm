@@ -1,3 +1,13 @@
+## TitiFarm Travel - MVP
+
+Chạy dự án:
+
+```bash
+npm run dev
+```
+
+Cấu hình email (Mailtrap hoặc SMTP thật) trong `.env` để đăng nhập Email.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
