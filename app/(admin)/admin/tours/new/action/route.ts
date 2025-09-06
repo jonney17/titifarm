@@ -19,7 +19,10 @@ export async function POST(req: NextRequest) {
   const buffer = Buffer.from(arrayBuffer);
   const ext = (file.name?.split(".").pop() ? `.${file.name.split(".").pop()}` : ".png").toLowerCase();
   const filename = `${slug}-${Date.now()}${ext}`;
-  const { url: publicUrl } = await put(filename, buffer, { access: "public" });
+  const { url: publicUrl } = await put(filename, buffer, {
+    access: "public",
+    token: process.env.BLOB_READ_WRITE_TOKEN,
+  });
 
   // Ensure a default destination exists (TitiFarm)
   const defaultDest = await prisma.destination.upsert({
