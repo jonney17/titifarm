@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/app/lib/prisma";
-import { promises as fs } from "fs";
-import path from "path";
+import { put } from "@vercel/blob";
 
 export async function POST(req: NextRequest) {
   const form = await req.formData();
@@ -15,18 +14,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "INVALID_INPUT" }, { status: 400 });
   }
 
-  // Ensure upload dir
-  const uploadDir = path.join(process.cwd(), "public", "uploads");
-  await fs.mkdir(uploadDir, { recursive: true });
-
-  // Save file
+  // Upload to Vercel Blob (public read)
   const arrayBuffer = await file.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
-  const ext = path.extname(file.name) || ".png";
+  const ext = (file.name?.split(".").pop() ? `.${file.name.split(".").pop()}` : ".png").toLowerCase();
   const filename = `${slug}-${Date.now()}${ext}`;
-  const filepath = path.join(uploadDir, filename);
-  await fs.writeFile(filepath, buffer);
-  const publicUrl = `/uploads/${filename}`;
+  const { url: publicUrl } = await put(filename, buffer, { access: "public" });
 
   // Ensure a default destination exists (TitiFarm)
   const defaultDest = await prisma.destination.upsert({

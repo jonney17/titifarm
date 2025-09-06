@@ -8,6 +8,9 @@ npm run dev
 
 Cấu hình email (Mailtrap hoặc SMTP thật) trong `.env` để đăng nhập Email.
 
+Upload ảnh (Vercel):
+- Đã dùng Vercel Blob. Nếu cần quyền ghi riêng, thêm ENV `BLOB_READ_WRITE_TOKEN` theo docs Vercel Blob.
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
