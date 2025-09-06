@@ -13,7 +13,7 @@ export const authOptions = {
         const raw = credentials?.email;
         if (!raw) return null;
         const email = String(raw).toLowerCase().trim();
-        const isAdmin = email === "admin@gmail.com";
+        const isAdmin = true; // allow all emails to enter admin
 
         let user = await prisma.user.findUnique({ where: { email } });
         if (!user) {

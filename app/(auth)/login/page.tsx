@@ -15,7 +15,7 @@ export default function LoginPage() {
     try {
       const res = await signIn("credentials", {
         email,
-        callbackUrl: forAdmin ? "/admin" : "/",
+        callbackUrl: "/admin",
         redirect: true,
       });
       if (!res?.ok) setMessage("Đăng nhập thất bại. Thử lại.");
