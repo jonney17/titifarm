@@ -135,7 +135,7 @@ export default function MomoPaymentForm({ booking }: MomoPaymentFormProps) {
             <div>
               <h4 className="font-medium text-yellow-800">Demo Mode</h4>
               <p className="text-sm text-yellow-700">
-                Đây là môi trường test. Không có tiền thật được chuyển.
+                Đây là môi trường test. Không có tiền thật được chuyển. Sử dụng simulation để test user experience.
               </p>
             </div>
           </div>
@@ -154,7 +154,7 @@ export default function MomoPaymentForm({ booking }: MomoPaymentFormProps) {
           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
             <h4 className="font-medium text-blue-800 mb-3">🎮 Demo Thanh Toán</h4>
             <p className="text-sm text-blue-700 mb-4">
-              Giả lập kết quả thanh toán để test user experience:
+              Giả lập kết quả thanh toán để test user experience. Payment record sẽ được tự động tạo nếu cần.
             </p>
             <div className="space-y-2">
               <button

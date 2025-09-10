@@ -25,8 +25,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Tìm payment record
-    const payment = await prisma.payment.findFirst({
+    // Tìm hoặc tạo payment record
+    let payment = await prisma.payment.findFirst({
       where: {
         bookingId: booking.id,
         provider: "MOMO",
@@ -34,11 +34,25 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    // Nếu chưa có payment record, tạo mới cho demo
     if (!payment) {
-      return NextResponse.json(
-        { error: "Payment record not found" },
-        { status: 404 }
-      );
+      const orderId = `MOMO_DEMO_${booking.code}_${Date.now()}`;
+      
+      payment = await prisma.payment.create({
+        data: {
+          bookingId: booking.id,
+          provider: "MOMO",
+          amountVnd: booking.totalAmountVnd,
+          status: "PENDING",
+          transactionId: orderId,
+          raw: {
+            demoMode: true,
+            createdForSimulation: true,
+            orderId,
+            createdAt: new Date().toISOString(),
+          },
+        },
+      });
     }
 
     const simulatedTransactionId = `MOMO_SIM_${Date.now()}`;
