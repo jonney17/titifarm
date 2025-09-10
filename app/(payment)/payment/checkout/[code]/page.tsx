@@ -8,16 +8,7 @@ export default async function CheckoutPage({ params }: Props) {
   const booking = await prisma.booking.findUnique({ where: { code } });
   if (!booking) return redirect("/tours");
 
-  // Demo: tạo payment record trạng thái PENDING và dẫn tới trang "cổng"
-  await prisma.payment.create({
-    data: {
-      bookingId: booking.id,
-      provider: "MANUAL",
-      amountVnd: booking.totalAmountVnd,
-      status: "PENDING",
-    },
-  });
-
+  // Redirect tới trang chọn phương thức thanh toán
   redirect(`/payment/gateway/${code}`);
 }
 

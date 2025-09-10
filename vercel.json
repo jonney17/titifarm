@@ -1,0 +1,22 @@
+{
+  "env": {
+    "NODE_ENV": "production"
+  },
+  "functions": {
+    "app/api/payment/momo/ipn/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/payment/momo/callback/route.ts": {
+      "maxDuration": 30
+    },
+    "app/api/payment/momo/create/route.ts": {
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/payment/momo/(.*)",
+      "destination": "/api/payment/momo/$1"
+    }
+  ]
+}
