@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
       data: {
         raw: {
           ...momoRequest,
-          momoResponse,
+          momoResponse: momoResponse as any,
         },
       },
     });

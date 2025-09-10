@@ -90,7 +90,7 @@ export async function POST(req: NextRequest) {
             status: "SUCCEEDED",
             paidAt: new Date(),
             raw: {
-              ...existingPayment.raw,
+              ...(existingPayment.raw as any),
               momoIPN: callbackData as any,
               ipnProcessedAt: new Date().toISOString(),
             },
@@ -112,7 +112,7 @@ export async function POST(req: NextRequest) {
         data: {
           status: "FAILED",
           raw: {
-            ...existingPayment.raw,
+            ...(existingPayment.raw as any),
             momoIPN: callbackData as any,
             ipnProcessedAt: new Date().toISOString(),
           },

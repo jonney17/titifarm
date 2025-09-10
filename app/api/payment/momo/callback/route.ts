@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
             status: "SUCCEEDED",
             paidAt: new Date(),
             raw: {
-              momoIPN: callbackData,
+              momoIPN: callbackData as any,
               updatedAt: new Date().toISOString(),
             },
           },
@@ -168,7 +168,7 @@ export async function POST(req: NextRequest) {
         data: {
           status: "FAILED",
           raw: {
-            momoIPN: callbackData,
+            momoIPN: callbackData as any,
             updatedAt: new Date().toISOString(),
           },
         },
