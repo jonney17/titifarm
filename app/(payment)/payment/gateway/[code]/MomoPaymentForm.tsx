@@ -24,6 +24,7 @@ export default function MomoPaymentForm({ booking }: MomoPaymentFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [paymentData, setPaymentData] = useState<any>(null);
+  const [showSimulation, setShowSimulation] = useState(false);
 
   const handleMomoPayment = async () => {
     setIsLoading(true);
@@ -73,6 +74,40 @@ export default function MomoPaymentForm({ booking }: MomoPaymentFormProps) {
     alert("Đã copy vào clipboard!");
   };
 
+  const handleSimulatePayment = async (action: 'success' | 'fail') => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch("/api/payment/momo/simulate", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          bookingCode: booking.code,
+          action,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || "Có lỗi xảy ra khi giả lập thanh toán");
+      }
+
+      if (result.success && result.redirectUrl) {
+        // Redirect to confirmation page
+        window.location.href = result.redirectUrl;
+      }
+    } catch (err) {
+      console.error("Payment simulation error:", err);
+      setError(err instanceof Error ? err.message : "Có lỗi xảy ra");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="space-y-4">
       {/* Momo Payment Option */}
@@ -93,6 +128,56 @@ export default function MomoPaymentForm({ booking }: MomoPaymentFormProps) {
           </div>
         )}
 
+        {/* Demo Mode Notice */}
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4">
+          <div className="flex items-center space-x-2">
+            <span className="text-yellow-600 text-lg">⚠️</span>
+            <div>
+              <h4 className="font-medium text-yellow-800">Demo Mode</h4>
+              <p className="text-sm text-yellow-700">
+                Đây là môi trường test. Không có tiền thật được chuyển.
+              </p>
+            </div>
+          </div>
+          <div className="mt-3 flex space-x-2">
+            <button
+              onClick={() => setShowSimulation(!showSimulation)}
+              className="text-yellow-700 hover:text-yellow-900 text-sm underline"
+            >
+              {showSimulation ? 'Ẩn' : 'Hiện'} tùy chọn demo
+            </button>
+          </div>
+        </div>
+
+        {/* Simulation Controls */}
+        {showSimulation && (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+            <h4 className="font-medium text-blue-800 mb-3">🎮 Demo Thanh Toán</h4>
+            <p className="text-sm text-blue-700 mb-4">
+              Giả lập kết quả thanh toán để test user experience:
+            </p>
+            <div className="space-y-2">
+              <button
+                onClick={() => handleSimulatePayment('success')}
+                disabled={isLoading}
+                className="w-full bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                ✅ Giả lập thanh toán thành công
+              </button>
+              <button
+                onClick={() => handleSimulatePayment('fail')}
+                disabled={isLoading}
+                className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-400 text-white font-medium py-2 px-4 rounded-lg transition-colors"
+              >
+                ❌ Giả lập thanh toán thất bại
+              </button>
+            </div>
+            <p className="text-xs text-blue-600 mt-3">
+              💡 Tip: Sử dụng để test luồng xác nhận và thông báo
+            </p>
+          </div>
+        )}
+
         {!paymentData ? (
           <button
             onClick={handleMomoPayment}
@@ -105,7 +190,7 @@ export default function MomoPaymentForm({ booking }: MomoPaymentFormProps) {
                 <span>Đang tạo thanh toán...</span>
               </div>
             ) : (
-              "Thanh toán với MoMo"
+              "Thanh toán với MoMo (Test)"
             )}
           </button>
         ) : (
